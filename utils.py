@@ -5,6 +5,8 @@ from threading import Thread
 from multiprocessing import Queue
 import time
 import copy
+from Reversi.board import GameState
+
 
 INFINITY = float(6000)
 
@@ -76,6 +78,7 @@ class MiniMaxAlgorithm:
                         for the minimax value recursivly from this state.
                         optional
         """
+
         self.utility = utility
         self.my_color = my_color
         self.no_more_time = no_more_time
@@ -89,7 +92,43 @@ class MiniMaxAlgorithm:
         :param maximizing_player: Whether this is a max node (True) or a min node (False).
         :return: A tuple: (The min max algorithm value, The move in case of max node or None in min mode)
         """
-        return self.utility(state), None
+        # print("The current depth is:",depth)
+        if depth == 0:
+            score = self.utility(state)  # TODO remove
+            print("at",maximizing_player, "score = ", score) # TODO remove
+            return score, None
+        moves = state.get_possible_moves()
+        if len(moves) == 0: # no more moves from this state
+            return self.utility(state), None
+        if maximizing_player: # our turn lets MAX # TODO change this with corrlation to state or agent
+            currMax = -INFINITY
+            bestMove = moves[0]
+            i = 0
+            while not(self.no_more_time()) and i < len(moves):
+                next_state = copy.deepcopy(state)
+                next_state.perform_move(moves[i][0], moves[i][1])
+                v,_ = self.search(next_state,depth-1,False)
+                print("At", depth, "depth best move is:", moves[i], "with score of:", v)
+                if currMax < v:
+                    currMax = v
+                    bestMove = moves[i]
+                i += 1
+                print("At", depth, "depth best move is:", bestMove, "with score of:", currMax)
+            return currMax, bestMove
+        else:              # not our turn lets MIN
+            currMin = INFINITY
+            i = 0
+            while not (self.no_more_time()) and i < len(moves):
+                next_state = copy.deepcopy(state)
+                next_state.perform_move(moves[i][0], moves[i][1])
+                v,_ = self.search(next_state, depth - 1, True)
+                # if currMax < v:
+                #     currMax = v
+                #     bestMove = moves[i]
+                currMin = min(v,currMin)
+                i += 1
+            return currMin, None
+
 
 
 class MiniMaxWithAlphaBetaPruning:

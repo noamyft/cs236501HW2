@@ -3,6 +3,7 @@
 from __future__ import print_function, division
 from .consts import *
 
+
 class GameState:
     def __init__(self):
         """ Initializing the board and current player.
@@ -114,7 +115,14 @@ class GameState:
             #print(VLINE)
             print(y, end=' ')
             for x in range(BOARD_ROWS):
-                print('| %s' % (self.board[x][y]), end=' ')
+                # print('| %s' % (self.board[x][y]), end=' ') # Original line
+                # Color printing
+                if self.board[x][y] == X_PLAYER:
+                    print('|','\033[1;34mX\033[1;m',end=' ')
+                elif self.board[x][y] == O_PLAYER:
+                    print('|','\033[1;31mO\033[1;m',end=' ')
+                else:
+                    print('| %s' % (self.board[x][y]), end=' ')
             print('|')
             #print(VLINE)
             print(HLINE)
