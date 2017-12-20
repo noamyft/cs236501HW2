@@ -9,7 +9,7 @@ from Reversi.consts import EM, OPPONENT_COLOR, BOARD_COLS, BOARD_ROWS
 import time
 import copy
 from collections import defaultdict
-from utils import MiniMaxAlgorithm
+from utils import MiniMaxWithAlphaBetaPruning
 
 
 #===============================================================================
@@ -26,8 +26,8 @@ class Player(abstract.AbstractPlayer):
         self.turns_remaining_in_round = self.k
         self.time_remaining_in_round = self.time_per_k_turns
         self.time_for_current_move = self.time_remaining_in_round / self.turns_remaining_in_round - 0.05
-        miniMax = MiniMaxAlgorithm(self.utility,player_color,self.no_more_time,False)
-        self.search = miniMax.search
+        alphaBeta = MiniMaxWithAlphaBetaPruning(self.utility,player_color,self.no_more_time,False)
+        self.search = alphaBeta.search
 
 
 
@@ -37,8 +37,8 @@ class Player(abstract.AbstractPlayer):
         depth = 2
         bestMove = None
         while not(self.no_more_time()):
-            print("MINMAX-The current depth is:",depth) # TODO remove
-            score,currMove = self.search(game_state,depth,True)
+            print(" AB-The current depth is:",depth) # TODO remove
+            score,currMove = self.search(game_state,depth,-INFINITY,INFINITY,True)
             if not(self.no_more_time()):
                 bestMove = currMove
             # print("At ",depth, "depth best move is:", bestMove,"with score of:",score) # TODO remove
@@ -51,7 +51,7 @@ class Player(abstract.AbstractPlayer):
         return (time.time() - self.clock) >= self.time_for_current_move
 
     def __repr__(self):
-        return '{} {}'.format(abstract.AbstractPlayer.__repr__(self), 'MiniMax')
+        return '{} {}'.format(abstract.AbstractPlayer.__repr__(self), 'AlphaBeta')
 
     def utility(self, state):
         if len(state.get_possible_moves()) == 0: #TODO trying something new this heuristic looks wrong to me

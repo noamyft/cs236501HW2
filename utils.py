@@ -95,7 +95,7 @@ class MiniMaxAlgorithm:
         # print("The current depth is:",depth)
         if depth == 0:
             score = self.utility(state)  # TODO remove
-            print("at",maximizing_player, "score = ", score) # TODO remove
+            # print("at",maximizing_player, "score = ", score) # TODO remove
             return score, None
         moves = state.get_possible_moves()
         if len(moves) == 0: # no more moves from this state
@@ -108,12 +108,12 @@ class MiniMaxAlgorithm:
                 next_state = copy.deepcopy(state)
                 next_state.perform_move(moves[i][0], moves[i][1])
                 v,_ = self.search(next_state,depth-1,False)
-                print("At", depth, "depth best move is:", moves[i], "with score of:", v)
+                # print("At", depth, "depth best move is:", moves[i], "with score of:", v) # TODO remove
                 if currMax < v:
                     currMax = v
                     bestMove = moves[i]
                 i += 1
-                print("At", depth, "depth best move is:", bestMove, "with score of:", currMax)
+                # print("At", depth, "depth best move is:", bestMove, "with score of:", currMax) # TODO remove
             return currMax, bestMove
         else:              # not our turn lets MIN
             currMin = INFINITY
@@ -159,4 +159,45 @@ class MiniMaxWithAlphaBetaPruning:
         :param maximizing_player: Whether this is a max node (True) or a min node (False).
         :return: A tuple: (The alpha-beta algorithm value, The move in case of max node or None in min mode)
         """
-        return self.utility(state), None
+        # print("The current depth is:",depth)
+        if depth == 0:
+            score = self.utility(state)  # TODO remove
+            # print("at",maximizing_player, "score = ", score) # TODO remove
+            return score, None
+        moves = state.get_possible_moves()
+        if len(moves) == 0:  # no more moves from this state
+            return self.utility(state), None
+        if maximizing_player:  # our turn lets MAX # TODO change this with corrlation to state or agent
+            currMax = -INFINITY
+            bestMove = moves[0]
+            i = 0
+            while not(self.no_more_time()) and i < len(moves):
+                next_state = copy.deepcopy(state)
+                next_state.perform_move(moves[i][0], moves[i][1])
+                v, _ = self.search(next_state, depth - 1, alpha, beta, False)
+                # print("At", depth, "depth best move is:", moves[i], "with score of:", v) # TODO remove
+                if currMax < v: # should update max and best move
+                    currMax = v
+                    bestMove = moves[i]
+                alpha = max(currMax,alpha)
+                if currMax >= beta:
+                    return INFINITY, bestMove
+                i += 1
+                # print("At", depth, "depth best move is:", bestMove, "with score of:", currMax) # TODO remove
+            return currMax, bestMove
+        else:  # not our turn lets MIN
+            currMin = INFINITY
+            i = 0
+            while not (self.no_more_time()) and i < len(moves):
+                next_state = copy.deepcopy(state)
+                next_state.perform_move(moves[i][0], moves[i][1])
+                v, _ = self.search(next_state, depth - 1, alpha, beta, True)
+                # if currMax < v:
+                #     currMax = v
+                #     bestMove = moves[i]
+                currMin = min(v, currMin)
+                beta = min(currMin,beta)
+                if currMin <= alpha:
+                    return -INFINITY, None
+                i += 1
+            return currMin, None
