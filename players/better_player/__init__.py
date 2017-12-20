@@ -75,8 +75,8 @@ class Player(abstract.AbstractPlayer):
         for move in possible_moves:
             new_state = copy.deepcopy(game_state)
             new_state.perform_move(move[0], move[1])
-            print("###DEBUG: move x=", move[0]," y=",move[1])
-            if self.utility(new_state,True) > self.utility(next_state): #TODO set variable for self.utility(next_state)
+            # print("###DEBUG: move x=", move[0]," y=",move[1])
+            if self.utility(new_state,False) > self.utility(next_state): #TODO set variable for self.utility(next_state)
                 next_state = new_state
                 best_move = move
 
@@ -86,7 +86,7 @@ class Player(abstract.AbstractPlayer):
         else:
             self.turns_remaining_in_round -= 1
             self.time_remaining_in_round -= (time.time() - self.clock)
-        self.utility(next_state, True)
+        self.utility(next_state,False)
 
         return best_move
 

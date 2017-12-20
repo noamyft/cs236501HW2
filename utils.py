@@ -8,6 +8,7 @@ import copy
 from Reversi.board import GameState
 
 
+
 INFINITY = float(6000)
 
 
