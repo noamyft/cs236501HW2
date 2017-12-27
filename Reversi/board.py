@@ -9,6 +9,7 @@ class GameState:
         """ Initializing the board and current player.
         """
         self.board = []
+        self.moves_played = ''
         for i in range(BOARD_COLS):
             self.board.append([EM] * BOARD_ROWS)
 
@@ -86,6 +87,8 @@ class GameState:
             self.board[x][y] = self.curr_player
         # Updating the current player.
         self.curr_player = OPPONENT_COLOR[self.curr_player]
+        self.moves_played += str(xstart)
+        self.moves_played += str(ystart)
         return True
     
     def get_winner(self):

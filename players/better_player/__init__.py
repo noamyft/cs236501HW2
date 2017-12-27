@@ -10,6 +10,7 @@ import time
 import copy
 import numpy as np
 from collections import defaultdict
+import opening_book
 
 
 #===============================================================================
@@ -29,6 +30,8 @@ class Player(abstract.AbstractPlayer):
     def __init__(self, setup_time, player_color, time_per_k_turns, k):
         abstract.AbstractPlayer.__init__(self, setup_time, player_color, time_per_k_turns, k)
         self.clock = time.time()
+        my_book = opening_book()
+        self.opening_book = my_book
 
         # We are simply providing (remaining time / remaining turns) for each turn in round.
         # Taking a spare time of 0.05 seconds.
@@ -66,7 +69,10 @@ class Player(abstract.AbstractPlayer):
         self.time_for_current_move = self.time_remaining_in_round / self.turns_remaining_in_round - 0.05
         if len(possible_moves) == 1:
             return possible_moves[0]
-
+        if len(game_state.moves_played) < 20:
+            move_by_book = self.opening_move(game_state)
+            if move_by_book is not None:
+                return move_by_book
         best_move = possible_moves[0]
         next_state = copy.deepcopy(game_state)
         next_state.perform_move(best_move[0], best_move[1])
@@ -199,3 +205,8 @@ class Player(abstract.AbstractPlayer):
             j -= 1
 
         return [dic[self.color],dic[OPPONENT_COLOR[self.color]]]
+
+
+
+    def opening_move(self,state):
+        return self.opening_book.get(state.moves_played)
