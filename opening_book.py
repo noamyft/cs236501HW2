@@ -16,16 +16,13 @@ class OpeningBook:
 
     def __fixChar(self, ch):
         if (ch >= 'a') and (ch <= 'h'):
-            pass
-            # ch = chr(ord(ch) - ord('a') + ord('0'))
+            ch = chr(ord(ch) - ord('a') + ord('0'))
         elif (ch >= '1') and (ch <= '9'):
-            pass
-            # ch = chr(ord(ch) - 1)
-            # ch = 7 - int(ch)
-            # ch = str(ch)
+            ch = chr(ord(ch) - 1)
+            ch = 7 - int(ch)
+            ch = str(ch)
         else:
-            pass
-            # ch = ''
+            ch = ''
 
         return ch
 
@@ -42,7 +39,6 @@ class OpeningBook:
 
             topOpening = sorted(self.openings.items(), key=operator.itemgetter(1))
             topOpening = topOpening[-OpeningBook.TOP:]
-            print(topOpening)
             topOpening = [ item[0] for item in topOpening]
 
         return topOpening
