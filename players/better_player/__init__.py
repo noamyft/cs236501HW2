@@ -9,8 +9,8 @@ from Reversi.consts import EM, OPPONENT_COLOR, BOARD_COLS, BOARD_ROWS
 import time
 import copy
 import numpy as np
+from opening_book import OpeningBook
 from collections import defaultdict
-import opening_book
 
 
 #===============================================================================
@@ -30,7 +30,7 @@ class Player(abstract.AbstractPlayer):
     def __init__(self, setup_time, player_color, time_per_k_turns, k):
         abstract.AbstractPlayer.__init__(self, setup_time, player_color, time_per_k_turns, k)
         self.clock = time.time()
-        my_book = opening_book()
+        my_book = OpeningBook()
         self.opening_book = my_book
 
         # We are simply providing (remaining time / remaining turns) for each turn in round.
