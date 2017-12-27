@@ -19,12 +19,15 @@ import numpy as np
 
 class Player(abstract.AbstractPlayer):
 
-    SCORE_CORNER = 10
-    SCORE_PERIMETER_CORNER = -2
-    SCORE_BORDER = 3
-    SCORE_PERIMETER_BORDER = -1
-    SCORE_ONE_TILE = 1.5
-    SCORE_FRONTIER = -1
+    SCORE_CORNER = 10 # 5-50
+    SCORE_PERIMETER_CORNER = -2 # -20-2
+    SCORE_BORDER = 3 # 1-30
+    SCORE_PERIMETER_BORDER = -1 # -15--1
+    SCORE_ONE_TILE = 1.5 # 1-30
+    SCORE_FRONTIER = -1 # -10--1
+    DECAY = 1
+    DECAY_INITIAL = 1.2
+    DECAY_FACTOR = 250 # 250 outscored 120,200,300,1000
 
 
     def __init__(self, setup_time, player_color, time_per_k_turns, k):
@@ -36,7 +39,7 @@ class Player(abstract.AbstractPlayer):
         self.turns_remaining_in_round = self.k
         self.time_remaining_in_round = self.time_per_k_turns
         self.time_for_current_move = self.time_remaining_in_round / self.turns_remaining_in_round - 0.05
-        alphaBeta = MiniMaxWithAlphaBetaPruning(self.utility,player_color,self.no_more_time,False)
+        alphaBeta = MiniMaxWithAlphaBetaPruning(self.utilityBetter,player_color,self.no_more_time,False)
         self.search = alphaBeta.search
 
         # divide the board into 5 categories and score them from best to worst
@@ -92,33 +95,33 @@ class Player(abstract.AbstractPlayer):
 
 
     #*****      simple heuristic        *****#
-    # def utility(self, state):
-    #     if len(state.get_possible_moves()) == 0: #TODO trying something new this heuristic looks wrong to me
-    #         return INFINITY if state.curr_player != self.color else -INFINITY
-    #
-    #     my_u = 0
-    #     op_u = 0
-    #     for x in range(BOARD_COLS):
-    #         for y in range(BOARD_ROWS):
-    #             if state.board[x][y] == self.color:
-    #                 my_u += 1
-    #             if state.board[x][y] == OPPONENT_COLOR[self.color]:
-    #                 op_u += 1
-    #
-    #     if my_u == 0:
-    #         # I have no tools left
-    #         return -INFINITY
-    #     elif op_u == 0:
-    #         # The opponent has no tools left
-    #         return INFINITY
-    #     # elif len(state.get_possible_moves()) == 0:
-    #     #     print("NO MOVES",my_u - op_u) # TODO remove
-    #     #     return INFINITY if (my_u - op_u > 0) else -INFINITY
-    #     else:
-    #         return my_u - op_u
+    def utilitySimple(self, state):
+        if len(state.get_possible_moves()) == 0: #TODO trying something new this heuristic looks wrong to me
+            return INFINITY if state.curr_player != self.color else -INFINITY
+
+        my_u = 0
+        op_u = 0
+        for x in range(BOARD_COLS):
+            for y in range(BOARD_ROWS):
+                if state.board[x][y] == self.color:
+                    my_u += 1
+                if state.board[x][y] == OPPONENT_COLOR[self.color]:
+                    op_u += 1
+
+        if my_u == 0:
+            # I have no tools left
+            return -INFINITY
+        elif op_u == 0:
+            # The opponent has no tools left
+            return INFINITY
+        # elif len(state.get_possible_moves()) == 0:
+        #     print("NO MOVES",my_u - op_u) # TODO remove
+        #     return INFINITY if (my_u - op_u > 0) else -INFINITY
+        else:
+            return my_u - op_u
 
     # *****      better heuristic        *****#
-    def utility(self, state, verbose=False):
+    def utilityBetter(self, state, verbose=False):
         if len(state.get_possible_moves()) == 0:
             return INFINITY if state.curr_player != self.color else -INFINITY
 
@@ -146,16 +149,20 @@ class Player(abstract.AbstractPlayer):
 
         else:"""
         return my_u - op_u
+
+
     def scoreOfTiles(self, state):
     # Uses the initial scoring mat to evaluate the state
         my_u = op_u = 0
         for x in range(BOARD_COLS):
             for y in range(BOARD_ROWS):
                 if state.board[x][y] == self.color:
-                    my_u += self.scoreMat[x][y] + Player.SCORE_ONE_TILE
+                    my_u += Player.DECAY * self.scoreMat[x][y] + Player.SCORE_ONE_TILE
                 if state.board[x][y] == OPPONENT_COLOR[self.color]:
-                    op_u += self.scoreMat[x][y] + Player.SCORE_ONE_TILE
+                    op_u += Player.DECAY * self.scoreMat[x][y] + Player.SCORE_ONE_TILE
+            Player.DECAY = Player.DECAY_INITIAL - (my_u + op_u) / Player.DECAY_FACTOR  # CHANGE
         return [my_u,op_u]
+
 
     def countNumOfEmptyAroundTile(self, state):
     # Return the number of empty tiles
