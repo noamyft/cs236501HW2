@@ -4,13 +4,13 @@
 #===============================================================================
 
 import abstract
-from utils import INFINITY, run_with_limited_time, ExceededTimeError
+from utils import INFINITY, run_with_limited_time, ExceededTimeError, Book
 from Reversi.consts import EM, OPPONENT_COLOR, BOARD_COLS, BOARD_ROWS
 import time
 import copy
 import numpy as np
-from opening_book import OpeningBook
 from collections import defaultdict
+
 
 
 #===============================================================================
@@ -30,8 +30,9 @@ class Player(abstract.AbstractPlayer):
     def __init__(self, setup_time, player_color, time_per_k_turns, k):
         abstract.AbstractPlayer.__init__(self, setup_time, player_color, time_per_k_turns, k)
         self.clock = time.time()
-        my_book = OpeningBook()
-        self.opening_book = my_book
+        my_book = Book()
+        self.opening_book = my_book.openingBook
+        self.moves_played =
 
         # We are simply providing (remaining time / remaining turns) for each turn in round.
         # Taking a spare time of 0.05 seconds.
@@ -70,6 +71,7 @@ class Player(abstract.AbstractPlayer):
         if len(possible_moves) == 1:
             return possible_moves[0]
         if len(game_state.moves_played) < 20:
+            self.moves_played += last_play_by_oppenent(game_state)
             move_by_book = self.opening_move(game_state)
             if move_by_book is not None:
                 return move_by_book
@@ -209,4 +211,7 @@ class Player(abstract.AbstractPlayer):
 
 
     def opening_move(self,state):
-        return self.opening_book.get(state.moves_played)
+        return self.opening_book.get(self.moves_played)
+
+
+    def last_play_by_oppenent(self,state):

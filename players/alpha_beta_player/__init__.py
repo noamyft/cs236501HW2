@@ -4,7 +4,7 @@
 #===============================================================================
 
 import abstract
-from utils import INFINITY, run_with_limited_time, ExceededTimeError
+from utils import INFINITY, run_with_limited_time, ExceededTimeError, MAX_DEPTH
 from Reversi.consts import EM, OPPONENT_COLOR, BOARD_COLS, BOARD_ROWS
 import time
 import copy
@@ -73,7 +73,7 @@ class Player(abstract.AbstractPlayer):
         self.time_for_current_move = self.time_remaining_in_round / self.turns_remaining_in_round - 0.05
         depth = 2
         bestMove = None
-        while not(self.no_more_time()):
+        while not(self.no_more_time()) and depth < MAX_DEPTH:
             # print(" AB-The current depth is:",depth) # TODO remove
             score,currMove = self.search(game_state,depth,-INFINITY,INFINITY,True)
             if not(self.no_more_time()):
@@ -88,7 +88,7 @@ class Player(abstract.AbstractPlayer):
         return (time.time() - self.clock) >= self.time_for_current_move
 
     def __repr__(self):
-        return '{} {}'.format(abstract.AbstractPlayer.__repr__(self), 'AlphaBeta')
+        return '{} {}'.format(abstract.AbstractPlayer.__repr__(self), 'alpha_beta')
 
 
 

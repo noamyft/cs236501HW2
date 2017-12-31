@@ -9,7 +9,7 @@ from Reversi.consts import EM, OPPONENT_COLOR, BOARD_COLS, BOARD_ROWS
 import time
 import copy
 from collections import defaultdict
-from utils import MiniMaxAlgorithm
+from utils import MiniMaxAlgorithm, MAX_DEPTH
 import numpy as np
 
 
@@ -28,7 +28,7 @@ class Player(abstract.AbstractPlayer):
     SCORE_FRONTIER = -1
     DECAY = 1
     DECAY_INITIAL = 1.2
-    DECAY_FACTOR = 120
+    DECAY_FACTOR = 250
 
 
     def __init__(self, setup_time, player_color, time_per_k_turns, k):
@@ -75,7 +75,7 @@ class Player(abstract.AbstractPlayer):
         self.time_for_current_move = self.time_remaining_in_round / self.turns_remaining_in_round - 0.05
         depth = 2
         bestMove = None
-        while not(self.no_more_time()):
+        while not(self.no_more_time()) and depth < MAX_DEPTH:
             # print("MINMAX-The current depth is:",depth) # TODO remove
             score,currMove = self.search(game_state,depth,True)
             if not(self.no_more_time()):
@@ -90,7 +90,7 @@ class Player(abstract.AbstractPlayer):
         return (time.time() - self.clock) >= self.time_for_current_move
 
     def __repr__(self):
-        return '{} {}'.format(abstract.AbstractPlayer.__repr__(self), 'MiniMax')
+        return '{} {}'.format(abstract.AbstractPlayer.__repr__(self), 'min_max')
 
 
     #*****      simple heuristic        *****#
