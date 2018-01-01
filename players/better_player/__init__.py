@@ -26,13 +26,28 @@ class Player(abstract.AbstractPlayer):
     SCORE_PERIMETER_BORDER = -1
     SCORE_ONE_TILE = 1.5
     SCORE_FRONTIER = -1
+    ### For last board ###
+    OCCUPIED = 1
 
     def __init__(self, setup_time, player_color, time_per_k_turns, k):
         abstract.AbstractPlayer.__init__(self, setup_time, player_color, time_per_k_turns, k)
         self.clock = time.time()
         my_book = Book()
         self.opening_book = my_book.openingBook
-        self.moves_played =
+        self.moves_played = ''
+        self.last_board = []
+        for i in range(BOARD_COLS):
+            self.last_board.append([EM] * BOARD_ROWS)
+
+        for x in range(BOARD_COLS):
+            for y in range(BOARD_ROWS):
+                self.last_board[x][y] = EM
+
+        # Starting pieces:
+        self.last_board[3][3] = Player.OCCUPIED
+        self.last_board[3][4] = Player.OCCUPIED
+        self.last_board[4][3] = Player.OCCUPIED
+        self.last_board[4][4] = Player.OCCUPIED
 
         # We are simply providing (remaining time / remaining turns) for each turn in round.
         # Taking a spare time of 0.05 seconds.
@@ -70,10 +85,15 @@ class Player(abstract.AbstractPlayer):
         self.time_for_current_move = self.time_remaining_in_round / self.turns_remaining_in_round - 0.05
         if len(possible_moves) == 1:
             return possible_moves[0]
-        if len(game_state.moves_played) < 20:
-            self.moves_played += last_play_by_oppenent(game_state)
+        if len(self.moves_played) < 20:
+            self.moves_played += self.last_play_by_opponent(game_state) # updates the moves
             move_by_book = self.opening_move(game_state)
             if move_by_book is not None:
+                ### For Opening Book ###
+                self.moves_played += str(move_by_book[0])
+                self.moves_played += str(move_by_book[1])
+                self.last_board[move_by_book[0]][move_by_book[1]] = Player.OCCUPIED
+                ### End Opening Book ###
                 return move_by_book
         best_move = possible_moves[0]
         next_state = copy.deepcopy(game_state)
@@ -96,6 +116,11 @@ class Player(abstract.AbstractPlayer):
             self.time_remaining_in_round -= (time.time() - self.clock)
         self.utility(next_state,False)
 
+        ### For Opening Book ###
+        self.moves_played += str(best_move[0])
+        self.moves_played += str(best_move[1])
+        self.last_board[best_move[0]][best_move[1]] = Player.OCCUPIED
+        ### End Opening Book ###
         return best_move
 
     def utility(self, state, verbose = False):
@@ -214,4 +239,17 @@ class Player(abstract.AbstractPlayer):
         return self.opening_book.get(self.moves_played)
 
 
-    def last_play_by_oppenent(self,state):
+    # Updates user last board according to opponent last move
+    # retrieves the last move made by opponent as a str
+    # Should be only one change in the board
+    def last_play_by_opponent(self,state):
+        for x in range(BOARD_COLS):
+            for y in range(BOARD_ROWS):
+                if state.board[x][y] != EM and self.last_board[x][y] != Player.OCCUPIED:
+                    self.last_board[x][y] = Player.OCCUPIED
+                    return str(x)+str(y)
+        return '' # In the first turn no move was made board == last_board
+
+
+
+
