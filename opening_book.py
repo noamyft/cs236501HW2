@@ -14,6 +14,7 @@ class OpeningBook:
         self.openings = self.__analyzeFile()
         self.openingsMoves = self.__buildOpeningMove(self.openings)
 
+    # rotate the Opening Book so it match our board
     def __fixChar(self, ch):
         if (ch >= 'a') and (ch <= 'h'):
             ch = chr(ord(ch) - ord('a') + ord('0'))
@@ -26,6 +27,7 @@ class OpeningBook:
 
         return ch
 
+    # find best moves
     def __analyzeFile(self):
         with open(OpeningBook.FILE_PATH, "r") as file:
             for line in file:
